@@ -39,7 +39,9 @@ function run(text, name) {
   $("kpis").innerHTML = k("Samples", a.samples) + k("Duration", fmt(a.durationS) + " s") + k("Lowest", fmt(a.minBpm) + " bpm") + k("Average", fmt(a.avgBpm) + " bpm") + k("Highest", fmt(a.maxBpm) + " bpm at " + fmt(a.maxAtS) + " s") +
     k("Change 60 s after highest", a.dropAfterMax60s === null ? "file too short" : fmt(a.dropAfterMax60s) + " bpm") + k("Readings corrected", a.artifactsRemoved);
   $("chart").innerHTML = chart(rows, a.clean);
-  $("zones").innerHTML = ZONES.map(([n]) => `<tr><td>${n}</td><td>${fmt(a.zones[n])} s</td></tr>`).join("");
+  $("zones").innerHTML = ZONES.map(([n]) => `<tr><td>${n}</td><td>${fmt(a.zones[n])} s</td></tr>`).join("") + `<tr><td>Total</td><td>${fmt(Object.values(a.zones).reduce((x, y) => x + y, 0))} s</td></tr>`;
+  $("zonenote").textContent = `Each reading counts for the time until the next one, using the real timestamps. The last reading has no next one, so it counts for the typical gap, which is why the total can be one gap longer than the ${fmt(a.durationS)} s duration.`;
+  $("corr").innerHTML = a.corrected.length ? `<h2>Readings that were corrected (${a.corrected.length})</h2><p class="sub">These raw values were replaced with the previous good reading in the red line. They are outside 35 to 210 bpm or jumped more than 25 bpm, so a genuine fast change could be among them. The grey line still shows the raw file.</p><p>${a.corrected.slice(0, 12).map((c) => `${fmt(c.t, 1)} s: ${c.bpm} bpm`).map(esc).join("; ")}${a.corrected.length > 12 ? `; and ${a.corrected.length - 12} more` : ""}</p>` : "";
   $("out").hidden = false;
   const { clean, ...summary } = a;
   last = { ...summary, name: name || "pasted data", at: Date.now() };
