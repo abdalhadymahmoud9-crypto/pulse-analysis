@@ -33,13 +33,13 @@ const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
 
 // Replaces impossible values or sudden jumps with the previous good value. Returns { clean, removed }.
 export function removeArtifacts(bpm, { low, high, maxJump } = LIMITS) {
-  const clean = []; let last = null, removed = 0;
+  const clean = [], idx = []; let last = null, removed = 0;
   const fallback = bpm.length ? median(bpm) : 0;
   for (const v of bpm) {
     const bad = v < low || v > high || (last !== null && Math.abs(v - last) > maxJump);
-    if (bad) { clean.push(last !== null ? last : fallback); removed++; } else { clean.push(v); last = v; }
+    if (bad) { clean.push(last !== null ? last : fallback); removed++; idx.push(clean.length - 1); } else { clean.push(v); last = v; }
   }
-  return { clean, removed };
+  return { clean, removed, idx };
 }
 
 export function smooth(values, window = LIMITS.window) {
@@ -65,12 +65,12 @@ export function zoneSeconds(rows, bpm, maxHr) {
 export function analyze(rows, maxHr = 190) {
   if (rows.length < 2) throw new Error("Need at least 2 valid rows.");
   const raw = rows.map((r) => r.bpm);
-  const { clean: c1, removed } = removeArtifacts(raw);
+  const { clean: c1, removed, idx } = removeArtifacts(raw);
   const clean = smooth(c1);
   let pi = 0; clean.forEach((v, i) => { if (v > clean[pi]) pi = i; });
   const after = rows.findIndex((r) => r.t >= rows[pi].t + 60);
   return {
-    samples: rows.length, durationS: rows[rows.length - 1].t - rows[0].t, artifactsRemoved: removed,
+    samples: rows.length, durationS: rows[rows.length - 1].t - rows[0].t, artifactsRemoved: removed, corrected: idx.map((i) => ({ t: rows[i].t, bpm: rows[i].bpm })),
     minBpm: Math.min(...clean), avgBpm: mean(clean), maxBpm: clean[pi], maxAtS: rows[pi].t,
     dropAfterMax60s: after === -1 ? null : clean[pi] - clean[after],
     zones: zoneSeconds(rows, clean, maxHr), maxHrUsed: maxHr, clean,
