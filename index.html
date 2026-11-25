@@ -37,7 +37,7 @@ h2{font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mute
 <section id="out" hidden aria-live="polite">
 <div class="grid" id="kpis"></div>
 <div id="chart"></div>
-<h2>Time in zone (share of max HR you entered)</h2><table id="zones"></table>
+<h2>Time in zone (share of max HR you entered)</h2><table id="zones"></table><p id="zonenote" class="sub" style="font-size:.85rem"></p><div id="corr"></div>
 </section>
 <p class="limits">Limits: this tool reads numbers from a CSV and reports them. It does not detect heartbeats, and it does not produce resting heart rate, HRV or recovery scores, or any health assessment. Cleaning drops readings below 35 or above 210 bpm and jumps over 25 bpm between samples, then applies a rolling median of 9. Max HR is a value you type, not a measurement. Not medical advice. Up to 20,000 rows. Built with AI assistance.</p>
 <div class="acct"><span id="who"></span><button id="login" class="ghost" type="button">Sign in with Google</button><button id="logout" class="ghost" type="button" hidden>Sign out</button></div>
