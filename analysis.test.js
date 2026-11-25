@@ -35,3 +35,14 @@ test("drop is null when file ends within 60s of the peak", () => {
   const rows = Array.from({ length: 30 }, (_, i) => ({ t: i, bpm: 60 + i }));
   assert.equal(analyze(rows).dropAfterMax60s, null);
 });
+
+test("corrected readings are listed with time and raw value", () => {
+  const rows = [70, 70, 0, 70, 230, 71].map((b, i) => ({ t: i * 2, bpm: b }));
+  const a = analyze(rows);
+  assert.deepEqual(a.corrected, [{ t: 4, bpm: 0 }, { t: 8, bpm: 230 }]);
+});
+test("zone seconds use real timestamps with irregular spacing", () => {
+  const rows = [{ t: 0, bpm: 100 }, { t: 10, bpm: 100 }, { t: 12, bpm: 180 }];
+  const z = zoneSeconds(rows, [100, 100, 180], 190);
+  assert.equal(z["Below 60%"], 12 - 0 > 0 ? 12 : 0); assert.equal(z["90%+"], 6);
+});
